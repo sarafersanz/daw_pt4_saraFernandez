@@ -108,8 +108,9 @@ public class LoginServlet extends HttpServlet
 					{
 						session.setAttribute("usuario", usuario);
 						int tipo = rset.getInt("tipo_usuario");
+						int id_usuario = rset.getInt("id_usuario");
 						if(tipo == 0) {
-							nextPage = "/tienda.jsp";
+							nextPage = "/shopping";
 						}else {
 							nextPage = "/gestion.jsp";
 						}

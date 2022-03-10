@@ -9,10 +9,16 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.sql.DataSource;
-
+/**
+ * @author Alvca
+ * LibrosMVC
+ * Encapsula la comunicación con la base de datos 
+ * Almacena títulos, autores y precios en tres tablas
+ */
 public class Tienda_libros
 {
 	static ArrayList<Libro> tabla = new ArrayList<Libro>();
+	static ArrayList<String> test = new ArrayList<String>();
 	private static DataSource pool;
 	public static void cargarDatos() throws ServletException
 	{
@@ -36,27 +42,24 @@ public class Tienda_libros
 		Statement stmt = null;
 		try
 		{
-			/*// Paso 1: Cargamos el driver
-			Class.forName("com.mysql.cj.jdbc.Driver");
-			// Paso 2: Conectarse a la base de datos utilizando un objeto de la clase Connection
-			String userName = "servletUser";
-			String password = "Studium2022;";
-			// URL de la base de datos
-			String url = "jdbc:mysql://localhost:3306/tienda_libros?serverTimezone=UTC";*/
-		
 			conn = pool.getConnection();
 			// Paso 3: Crear las sentencias SQL utilizando objetos de la clase Statement
 			stmt = conn.createStatement();
 			// Paso 4: Ejecutar las sentencias
-			String sqlStr = "SELECT * FROM libros, autores where id_autorFK = id_autor";
+			String sqlStr = "SELECT l.id_libro, l.titulo_libro, a.nombre_autor, l.precio_libro  FROM libros as l, autores as a where l.id_autorFK = a.id_autor";
 			ResultSet rs = stmt.executeQuery(sqlStr);
 			Libro libro;
 			while(rs.next())
 			{
-				libro = new Libro(rs.getInt("id_libro"), rs.getString("nombre_autor"),
-						rs.getString("titulo_libro"), rs.getDouble("precio_libro"));
+				
+				//test.add(rs.getString("titulo_libro"));
+				//System.out.println(test);
+				libro = new Libro(rs.getInt("id_libro"), rs.getString("titulo_libro"),
+						rs.getString("nombre_autor"), rs.getDouble("precio_libro"));
+				//System.out.println(libro);
 				tabla.add(libro);
 			}
+			
 		}
 		catch(Exception ex)
 		{

@@ -1,5 +1,10 @@
 package es.studium.Tienda_libros;
-
+/**
+ * @author Alvca
+ * Libro 
+ * * Representa un libro 
+ * * Incluye identificador del libro, título, autor y precio
+ */
 public class Libro
 {
 	private int id;

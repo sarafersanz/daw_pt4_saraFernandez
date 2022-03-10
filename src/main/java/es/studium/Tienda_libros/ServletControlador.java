@@ -1,10 +1,12 @@
 package es.studium.Tienda_libros;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.Iterator;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -14,17 +16,35 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 @WebServlet("/shopping")
 public class ServletControlador extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
 	
+	// Pool de conexiones a la base de datos
+			private DataSource pool;
+	
 	public void init(ServletConfig conf) throws ServletException
 	{
 		super.init(conf);
 		try {
 			Tienda_libros.cargarDatos();
+			try
+			{
+				// Crea un contexto para poder luego buscar el recurso DataSource
+				InitialContext ctx = new InitialContext();
+				// Busca el recurso DataSource en el contexto
+				pool = (DataSource)ctx.lookup("java:comp/env/jdbc/mysql_tiendalibros");
+				if(pool == null)
+				{
+					throw new ServletException("DataSource desconocida 'mysql_tiendalibros'");
+				}
+			}
+			catch(NamingException ex){
+				System.err.println("SQL exception: " + ex.getMessage());
+			}
 		} catch (ServletException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -50,16 +70,16 @@ public class ServletControlador extends HttpServlet
 		String todo = request.getParameter("todo");
 		if(todo==null)
 		{
-			// Primer acceso, redirigir a order.jsp
-			nextPage = "/order.jsp";
+			// Primer acceso, redirigir a tienda.jsp
+			nextPage = "/tienda.jsp";
 		}
 		else if(todo.equals("add"))
 		{
 			// Mandado por order.jsp con los parámetros idLibro y cantidad
 			// Creamos un elementoPedido y lo añadimos al carrito
 			ElementoPedido nuevoElementoPedido = new ElementoPedido(
-					Integer.parseInt(request.getParameter("id_libroFK")),
-					Integer.parseInt(request.getParameter("cantidad_pedido")));
+					Integer.parseInt(request.getParameter("idLibro")),
+					Integer.parseInt(request.getParameter("cantidad")));
 			if(elCarrito==null)
 			{
 				// El carrito está vacío
@@ -77,10 +97,8 @@ public class ServletControlador extends HttpServlet
 				Iterator<ElementoPedido> iter = elCarrito.iterator();
 				while(!encontrado&&iter.hasNext())
 				{
-					ElementoPedido unElementoPedido =
-							(ElementoPedido)iter.next();
-					if(unElementoPedido.getIdLibro() ==
-							nuevoElementoPedido.getIdLibro())
+					ElementoPedido unElementoPedido = (ElementoPedido)iter.next();
+					if(unElementoPedido.getIdLibro() == nuevoElementoPedido.getIdLibro())
 					{
 						unElementoPedido.setCantidad(unElementoPedido.getCantidad() +
 								nuevoElementoPedido.getCantidad());
@@ -94,7 +112,7 @@ public class ServletControlador extends HttpServlet
 				}
 			}
 			// Volvemos a order.jps para seguir con la compra
-			nextPage = "/order.jsp";
+			nextPage = "/tienda.jsp";
 		}
 		else if(todo.equals("remove"))
 		{
@@ -103,7 +121,7 @@ public class ServletControlador extends HttpServlet
 			int indiceCarrito = Integer.parseInt(request.getParameter("indiceElemento"));
 			elCarrito.remove(indiceCarrito);
 			// Vuelve a order.jsp para seguir con la compra
-			nextPage = "/order.jsp";
+			nextPage = "/tienda.jsp";
 		}
 		else if (todo.equals("checkout"))
 		{
@@ -126,12 +144,12 @@ public class ServletControlador extends HttpServlet
 			// Coloca el precioTotal y la cantidadtotal en el request
 			request.setAttribute("precioTotal", sb.toString());
 			request.setAttribute("cantidadTotal", cantidadTotalOrdenada+"");
+			// Conectar a la BD y crear un pedido con los datos de elCarrito
 			// Redirige a checkout.jsp
 			nextPage = "/checkout.jsp";
 		}
 		ServletContext servletContext = getServletContext();
-		RequestDispatcher requestDispatcher =
-				servletContext.getRequestDispatcher(nextPage);
+		RequestDispatcher requestDispatcher = servletContext.getRequestDispatcher(nextPage);
 		requestDispatcher.forward(request, response);
 	}
 }
