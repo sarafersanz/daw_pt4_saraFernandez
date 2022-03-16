@@ -1,7 +1,6 @@
 package es.studium.Tienda_libros;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,13 +24,13 @@ import javax.sql.DataSource;
 public class LoginServlet extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
-	
+
 	// Pool de conexiones a la base de datos
 	ServletContext servletContext = null;
 	private DataSource pool;
 	Connection conn = null;
 	Statement stmt = null;
-	
+
 	public LoginServlet()
 	{
 		super();
@@ -53,7 +52,14 @@ public class LoginServlet extends HttpServlet
 		catch(NamingException ex){}
 	}
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
+		doPost(request, response);
+
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		request.setCharacterEncoding("UTF-8");
 		String nextPage = null;
 		try
@@ -61,11 +67,11 @@ public class LoginServlet extends HttpServlet
 			// Obtener una conexión del pool
 			conn = pool.getConnection();
 			stmt = conn.createStatement();
-			
+
 			// Recuperar los parámetros usuario y password de la petición request
 			String usuario = request.getParameter("usuario");
 			String password = request.getParameter("password");
-			
+
 			// Validar los parámetros de la petición request
 			if(usuario.length()==0)
 			{
@@ -87,33 +93,38 @@ public class LoginServlet extends HttpServlet
 				ResultSet rset = stmt.executeQuery(sqlStr.toString());
 				if(!rset.next())
 				{
-					// Si el resultset  está vacío
+					// Si el resultset no está vacío
 					nextPage = "/index.jsp";
 					request.setAttribute("respuesta", "Credenciales incorrectas");
 				}
-					// Si el resultset no está vacío
 				else
 				{
 					// Si los datos introducidos son correctos
+					int id_usuario = rset.getInt("id_usuario");
 					// Crear una sesión nueva y guardar el usuario como variable de sesión
 					// Primero, invalida la sesión si ya existe
 					HttpSession session = request.getSession(false);
 					if(session != null)
 					{
 						session.invalidate();
-						
+
 					}
 					session = request.getSession(true);
 					synchronized(session)
 					{
+						session.setAttribute("id", id_usuario);
 						session.setAttribute("usuario", usuario);
-						int tipo = rset.getInt("tipo_usuario");
-						int id_usuario = rset.getInt("id_usuario");
-						if(tipo == 0) {
-							nextPage = "/shopping";
-						}else {
-							nextPage = "/gestion.jsp";
-						}
+					}
+					int tipo = rset.getInt("tipo_usuario");
+					if(tipo == 0) {
+						nextPage = "/shopping";
+					}else if(tipo == 1){
+						nextPage = "/gestion.jsp";
+					}else {
+						String registro = "Necesita ser un usuario para acceder";
+						request.setAttribute("registro", registro);
+						nextPage="index.jsp";
+
 					}
 
 				}
@@ -145,14 +156,7 @@ public class LoginServlet extends HttpServlet
 		RequestDispatcher requestDispatcher =
 				servletContext.getRequestDispatcher(nextPage);
 		requestDispatcher.forward(request, response);
-	}
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
 	}
 
 }

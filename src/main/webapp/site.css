@@ -1,6 +1,6 @@
 @charset "UTF-8";
 
-body#LoginForm {
+body{
 	background-image:
 		url("https://hdwallsource.com/img/2014/9/blur-26347-27038-hd-wallpapers.jpg");
 	background-repeat: no-repeat;
@@ -63,7 +63,7 @@ body#LoginForm {
 	padding: 0;
 }
 
-.botto-text {
+.botton-text {
 	color: #ffffff;
 	font-size: 14px;
 	margin: auto;
@@ -88,8 +88,19 @@ body#LoginForm {
 	border-color: #f0ad4e;
 	color: #ffffff;
 	font-size: 16px;
-    line-height: 35px;
 }
 .bg-orange{
     background-color:#f0ad4e;
+}
+.bg-orange-opacity {
+	background-color:#F7E2C3;
+}
+
+.no-style {
+	background: none;
+	color: inherit;
+	border: none;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
 }

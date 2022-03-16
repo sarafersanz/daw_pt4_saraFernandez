@@ -7,13 +7,8 @@
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link
-	href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
-	rel="stylesheet" id="bootstrap-css">
-<script
-	src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script
-	src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
 <link href="site.css" rel="stylesheet">
 
 <title>Login</title>
@@ -23,15 +18,14 @@
 	<div class="container h-100">
 		<div class="row justify-content-center align-items-center h-100 pb-5">
 			<div class="col-12">
-				<h1 class="pb-5 text-center display-4">Formulario
-					Login</h1>
+				<h1 class="pb-5 text-center display-4">Formulario Login</h1>
 				<div class="login-form">
 					<div class="main-div">
 						<div class="panel">
 							<h2>Login</h2>
 							<p class="pt-2">Por favor, introduzca su usuario y contraseña</p>
 						</div>
-						<form id="Login" method="GET" action="login">
+						<form id="Login" method="POST" action="login">
 
 							<div class="form-group">
 
@@ -60,6 +54,12 @@
 			</div>
 		</div>
 	</div>
+	<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="validation.js"></script>
 </body>
 
 </html>

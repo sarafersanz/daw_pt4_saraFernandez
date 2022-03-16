@@ -6,13 +6,8 @@
 <html lang="es">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link
-	href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
-	rel="stylesheet" id="bootstrap-css">
-<script
-	src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script
-	src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
 <link href="site.css" rel="stylesheet">
 <title>Tienda</title>
 </head>
@@ -22,6 +17,13 @@
 		<div class="row h-100 text-center justify-content-center">
 			<div class="col-10">
 				<div class="row pt-5">
+					<div class="col-12 text-right">
+						<form id="logout" name="logoutForm" action="shopping"
+							method="POST">
+							<input type="hidden" name="todo" value="logout">
+							<button type="submit" class="btn button">Salir</button>
+						</form>
+					</div>
 					<div class="col-12 text-center">
 						<h1 class="pt-5 display-3">Tienda Libros</h1>
 					</div>
@@ -34,19 +36,17 @@
 
 					<div class="col-12 pt-3">
 						<form name="AgregarForm" action="shopping" method="POST">
-							<input type="hidden" name="todo" value="add" />
-							Título: 
-							<select name="idLibro">
+							<input type="hidden" name="todo" value="add" /> Título: <select
+								name="idLibro">
 								<%
 								// Scriplet 1: Carga los libros en el SELECT
 								for (int i = 0; i < Tienda_libros.tamano(); i++) {
 									out.println("<option value='" + i + "'>");
-									out.println(Tienda_libros.getTitulo(i) + " | " + Tienda_libros.getAutor(i) + " | " + Tienda_libros.getPrecio(i));
+									out.println(Tienda_libros.getId(i) + " | " +Tienda_libros.getTitulo(i) + " | " + Tienda_libros.getAutor(i) + " " + Tienda_libros.getApellidos(i) + "|" + Tienda_libros.getPrecio(i));
 									out.println("</option>");
 								}
 								%>
-							</select> 
-							Cantidad: <input type="text" name="cantidad" size="10" value="1" />
+							</select> Cantidad: <input type="text" name="cantidad" size="10" value="1" />
 							<input type="submit" value="Añadir a la cesta" class="btn button" />
 						</form>
 					</div>
@@ -61,11 +61,11 @@
 						<h3>Tu cesta contiene:</h3>
 					</div>
 					<div class="col-12 pt-3">
-						<table class="table">
+						<table class="table table-striped">
 							<thead class="thead-dark">
 								<tr>
+									<th scope="col">Libro</th>
 									<th scope="col">Autor</th>
-									<th scope="col">Título</th>
 									<th scope="col">Precio</th>
 									<th scope="col">Cantidad</th>
 									<th scope="col">&nbsp;</th>
@@ -78,18 +78,22 @@
 									ElementoPedido elementoPedido = cesta.get(i);
 								%>
 								<tr>
-									<form name="borrarForm" action="shopping" method="POST">
-										<input type="hidden" name="todo" value="remove" /> <input
-											type="hidden" name="indiceElemento" value="<%=i%>" />
-										<td><%=elementoPedido.getTitulo()%></td>
-										<td><%=elementoPedido.getAutor()%></td>
-										<td class="text-right"><%=elementoPedido.getPrecio()%> €</td>
-										<td class="text-right"><%=elementoPedido.getCantidad()%></td>
-										<td><input type="submit" value="Eliminar de la cesta"
-											class="btn button" /></td>
-									</form>
+
+									<td><%=elementoPedido.getTitulo()%></td>
+									<td><%=elementoPedido.getAutor()%></td>
+									<td class="text-right"><%=elementoPedido.getPrecio()%> €</td>
+									<td class="text-right"><%=elementoPedido.getCantidad()%></td>
+									<td>
+										<form name="borrarForm" action="shopping" method="POST">
+											<input type="hidden" name="todo" value="remove" /> <input
+												type="hidden" name="indiceElemento" value="<%=i%>" /> <input
+												type="submit" value="Eliminar de la cesta"
+												class="btn btn-danger" />
+										</form>
+									</td>
+
 								</tr>
-									<%
+								<%
 									}
 									%>
 							</tbody>
@@ -98,16 +102,22 @@
 					<div class="col-12 pt-3">
 						<form name="checkoutForm" action="shopping" method="POST">
 							<input type="hidden" name="todo" value="checkout" /> <input
-								type="submit" value="Confirmar compra" class="btn button" />
+								type="submit" value="Confirmar compra" class="btn btn-success" />
 						</form>
 					</div>
-						<%
+					<%
 						}
 						%>
 				</div>
 			</div>
 		</div>
 	</div>
+	<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="validation.js"></script>
 </body>
 
 </html>

@@ -1,7 +1,12 @@
 package es.studium.Tienda_libros;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.Iterator;
 
@@ -22,10 +27,11 @@ import javax.sql.DataSource;
 public class ServletControlador extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
-	
+
 	// Pool de conexiones a la base de datos
-			private DataSource pool;
-	
+	private DataSource pool;
+	private double precioTotal = 0;
+
 	public void init(ServletConfig conf) throws ServletException
 	{
 		super.init(conf);
@@ -59,13 +65,13 @@ public class ServletControlador extends HttpServlet
 	ServletException, IOException
 	{
 		request.setCharacterEncoding("UTF-8");
-		// Recupera la sesiÛn actual o crea una nueva si no existe
+		// Recupera la sesi√≥n actual o crea una nueva si no existe
 		HttpSession session = request.getSession(true);
-		// Recupera el carrito de la sesiÛn actual
+		// Recupera el carrito de la sesi√≥n actual
 		@SuppressWarnings("unchecked")
 		ArrayList<ElementoPedido> elCarrito = (ArrayList<ElementoPedido>)
 		session.getAttribute("carrito");
-		// Determina a quÈ p·gina jsp se redirigir·
+		// Determina a qu√© p√°gina jsp se redirigir√°
 		String nextPage = "";
 		String todo = request.getParameter("todo");
 		if(todo==null)
@@ -75,29 +81,32 @@ public class ServletControlador extends HttpServlet
 		}
 		else if(todo.equals("add"))
 		{
-			// Mandado por order.jsp con los par·metros idLibro y cantidad
-			// Creamos un elementoPedido y lo aÒadimos al carrito
+			// Mandado por tienda.jsp con los par√°metros idLibro y cantidad
+			// Creamos un elementoPedido y lo a√±adimos al carrito
+
 			ElementoPedido nuevoElementoPedido = new ElementoPedido(
 					Integer.parseInt(request.getParameter("idLibro")),
 					Integer.parseInt(request.getParameter("cantidad")));
+
 			if(elCarrito==null)
 			{
-				// El carrito est· vacÌo
+				// El carrito est√° vac√≠o
 				elCarrito = new ArrayList<>();
 				elCarrito.add(nuevoElementoPedido);
-				// Enlazar el carrito con la sesiÛn
+				// Enlazar el carrito con la sesi√≥n
 				session.setAttribute("carrito", elCarrito);
 			}
 			else
 			{
-				// Comprueba si el libro est· ya en el carrito
-				// Si lo est·, actualizamos la cantidad
-				// Si no est·, lo aÒadimos
+				// Comprueba si el libro est√° ya en el carrito
+				// Si lo est√°, actualizamos la cantidad
+				// Si no est√°, lo a√±adimos
 				boolean encontrado = false;
 				Iterator<ElementoPedido> iter = elCarrito.iterator();
 				while(!encontrado&&iter.hasNext())
 				{
 					ElementoPedido unElementoPedido = (ElementoPedido)iter.next();
+					
 					if(unElementoPedido.getIdLibro() == nuevoElementoPedido.getIdLibro())
 					{
 						unElementoPedido.setCantidad(unElementoPedido.getCantidad() +
@@ -107,7 +116,7 @@ public class ServletControlador extends HttpServlet
 				}
 				if(!encontrado)
 				{
-					// Lo aÒade al carrito
+					// Lo a√±ade al carrito
 					elCarrito.add(nuevoElementoPedido);
 				}
 			}
@@ -116,19 +125,20 @@ public class ServletControlador extends HttpServlet
 		}
 		else if(todo.equals("remove"))
 		{
-			// Enviado por order.jsp con el par·metro indiceElemento
+			// Enviado por tienda.jsp con el par√°metro indiceElemento
 			// Borra el elemento indiceElemento del carrito
 			int indiceCarrito = Integer.parseInt(request.getParameter("indiceElemento"));
 			elCarrito.remove(indiceCarrito);
-			// Vuelve a order.jsp para seguir con la compra
+			// Vuelve a tienda.jsp para seguir con la compra
 			nextPage = "/tienda.jsp";
 		}
 		else if (todo.equals("checkout"))
 		{
-			// Enviado por order.jsp
+			// Enviado por tienda.jsp
 			// Calcula el precio total de todos los elementos del carrito
-			double precioTotal = 0;
+			
 			int cantidadTotalOrdenada = 0;
+			precioTotal = 0;
 			for(ElementoPedido item: elCarrito)
 			{
 				double precio = item.getPrecio();
@@ -141,13 +151,89 @@ public class ServletControlador extends HttpServlet
 			Formatter formatter = new Formatter(sb);
 			formatter.format("%.2f", precioTotal);
 			formatter.close();
-			// Coloca el precioTotal y la cantidadtotal en el request
+			// Coloca el precioTotal y la cantidad total en el request
 			request.setAttribute("precioTotal", sb.toString());
 			request.setAttribute("cantidadTotal", cantidadTotalOrdenada+"");
-			// Conectar a la BD y crear un pedido con los datos de elCarrito
-			// Redirige a checkout.jsp
 			nextPage = "/checkout.jsp";
 		}
+		else if (todo.equals("confirm"))
+		{
+			Date date = new Date();
+			SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			String fecha = formatter.format(date);
+
+			Connection conn = null;
+			Statement stmt = null;
+			try
+			{
+
+				// Obtener una conexiÔøΩn del pool
+				conn = pool.getConnection();
+				stmt = conn.createStatement();
+
+				//A√±adir el pedido
+				int id_usuarioFK = 1;//(int) session.getAttribute("id");
+				String sentencia="INSERT INTO pedidos(id_pedido, total_pedido, fecha_pedido, id_usuarioFK) VALUES(null, '" + precioTotal + "', '" + fecha + "', '" + id_usuarioFK + "');";
+				stmt.executeUpdate(sentencia);
+				
+
+				//Extraer id del pedido
+				ResultSet rs = stmt.executeQuery("SELECT MAX(id_pedido) as id_pedido FROM pedidos");
+				rs.next();
+
+				int idPedidoFK = rs.getInt("id_pedido");
+
+				//A√±adir elementos del carrito en pedidoslibros
+				for(ElementoPedido item : elCarrito) {
+
+					int cantidad = item.getCantidad();
+					int idLibroFK = item.getId();
+
+					String sentencia2 = "INSERT INTO pedidos_libros(id_pedido_libro, cantidad_pedido_libro, id_pedidoFK, id_libroFK) VALUES(null, " + cantidad + ", " + idPedidoFK + ", " + idLibroFK +");";
+					stmt.executeUpdate(sentencia2);
+					
+
+				}
+
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+				String errorCompra = "Su compra no se ha podido realizar";
+				request.setAttribute("errorCompra", errorCompra);
+				nextPage="/checkout.jsp";
+			}
+			finally
+			{
+				try
+				{
+					// Cerramos el resto de recursos
+					if(stmt != null)
+					{
+						stmt.close();
+					}
+					if(conn != null)
+					{
+						conn.close();
+					}
+				}
+				catch(Exception ex)
+				{
+					ex.printStackTrace();
+				}
+				session.removeAttribute("carrito");
+				String compra = "Su compra se ha realizado exitosamente";
+				request.setAttribute("compra", compra);
+				nextPage="/checkout.jsp";	
+			}
+		}
+		else if(todo.equals("logout")) {
+			session.invalidate();
+			nextPage = "/index.jsp";
+		}
+
+		// Conectar a la BD y crear un pedido con los datos de elCarrito
+
+		// Redirige a checkout.jsp
 		ServletContext servletContext = getServletContext();
 		RequestDispatcher requestDispatcher = servletContext.getRequestDispatcher(nextPage);
 		requestDispatcher.forward(request, response);

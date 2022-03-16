@@ -25,6 +25,12 @@ public class ElementoPedido
 	{
 		this.cantidad = cantidad;
 	}
+	
+	public int getId()
+	{
+		return Tienda_libros.getId(idLibro);
+	}
+	
 	public String getAutor()
 	{
 		return Tienda_libros.getAutor(idLibro);
@@ -37,4 +43,5 @@ public class ElementoPedido
 	{
 		return Tienda_libros.getPrecio(idLibro);
 	}
+	
 }
