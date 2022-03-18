@@ -25,6 +25,7 @@
 							<th scope="col">Total</th>
 							<th scope="col">Estado</th>
 							<th scope="col">Usuario</th>
+							<th scope="col">Detalles</th>
 							<th scope="col">Marcar como enviado</th>
 						</tr>
 					</thead>
@@ -38,6 +39,12 @@
 							<td><%=Pedidos.getTotal(i)%> €</td>
 							<td><%=Pedidos.getEstado(i)%></td>
 							<td><%=Pedidos.getUsuario(i)%></td>
+							<td><form name="DetailsForm" action="gestion" method="POST">
+									<input type="hidden" name="todo" value="detalles">
+									<input type="hidden" name="id" value="<%=Pedidos.getId(i)%>">
+									<button type="submit" class="btn button"
+										value="Detalles">Detalles</button>
+								</form></td>
 							<td><form name="estadoForm" action="gestion" method="POST">
 									<input type="hidden" name="todo" value="cambioestado">
 									<input type="hidden" name="id" value="<%=Pedidos.getId(i)%>">

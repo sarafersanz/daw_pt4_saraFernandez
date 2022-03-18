@@ -242,6 +242,20 @@ public class ServletControladorGestion extends HttpServlet {
 				nextPage = "/pedidos.jsp";
 			}
 		}
+		else if(todo.equals("detalles")) {
+			int id = Integer.parseInt(request.getParameter("id"));
+			
+			Detalles.cargarDatos(id);
+			
+			nextPage = "/detalles.jsp";
+		}
+		else if(todo.equals("detalles_todos")) {
+			int id = Integer.parseInt(request.getParameter("id"));
+			
+			Detalles.cargarDatos(id);
+			
+			nextPage = "/detalles_todos.jsp";
+		}
 		else if(todo.equals("pedidos")) {
 			Pedidos_todos.cargarDatos();
 			nextPage = "/pedidos_todos.jsp";

@@ -25,6 +25,7 @@
 							<th scope="col">Total</th>
 							<th scope="col">Estado</th>
 							<th scope="col">Usuario</th>
+							<th scope="col">Detalles</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -37,6 +38,12 @@
 							<td><%=Pedidos_todos.getTotal(i)%> €</td>
 							<td><%=Pedidos_todos.getEstado(i)%></td>
 							<td><%=Pedidos_todos.getUsuario(i)%></td>
+							<td><form name="DetailsForm" action="gestion" method="POST">
+									<input type="hidden" name="todo" value="detalles_todos">
+									<input type="hidden" name="id" value="<%=Pedidos_todos.getId(i)%>">
+									<button type="submit" class="btn button"
+										value="Detalles">Detalles</button>
+								</form></td>
 						</tr>
 						<%
 						}
